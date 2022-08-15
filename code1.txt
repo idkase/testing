@@ -1,0 +1,51 @@
+using System;
+using System.IO;
+using System.IO.Pipes;
+using System.Threading;
+using System.Text;
+
+namespace NamedPipesServer
+{
+    public class PipeServer
+    {
+        private static int numThreads = 4;
+        public static void Main(string[] args)
+        {
+
+            using (NamedPipeServerStream pipeServer =
+            new NamedPipeServerStream("testpipe", PipeDirection.Out))
+            {
+                Console.WriteLine("NamedPipeServerStream object created.");
+
+                // Wait for client connection
+
+                Console.Write("Waiting for client connection...");
+                pipeServer.WaitForConnection();
+
+                try
+                {
+                    // Read user input and send that to the client process
+                    using (StreamWriter sw = new StreamWriter(pipeServer))
+                    {
+                        sw.AutoFlush = true;
+                        Console.WriteLine("\nEnter text: ");
+                        string temp = Console.ReadLine();
+                       
+                        while(temp != "-1")
+                        {
+                            sw.WriteLine(temp);
+                            Console.WriteLine("\nEnter text: ");
+                            temp = Console.ReadLine();
+                        }
+                        
+                    }
+                }
+                catch(IOException e)
+                {
+                    Console.WriteLine("ERROR : {0}", e.Message);
+                }
+            }
+
+        }
+    }
+}

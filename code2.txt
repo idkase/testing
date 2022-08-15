@@ -1,0 +1,48 @@
+using System.IO;
+using System.IO.Pipes;
+using System;
+
+
+namespace NamedPipeClient
+{
+    public class NamedPipeClient
+    {
+        public static void Main(string[] args)
+        {
+           using (NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", "testpipe", PipeDirection.In))
+            {
+                // Connect to the pipe or wait until the pipe is available
+
+                Console.WriteLine("Attempting to connect to the pipe...");
+
+                pipeClient.Connect();
+
+                Console.WriteLine("Connected to the pipe.");
+                Console.WriteLine("There are currecntly {0} pipe server instances open.", pipeClient.NumberOfServerInstances);
+                while (true)
+                {
+                    try
+                    {
+                        using (StreamReader sr = new StreamReader(pipeClient))
+                        {
+                            //Display the read text to the console
+
+                            string temp;
+
+                            while ((temp = sr.ReadLine()) != null)
+                            {
+                                Console.WriteLine("Received from server : {0}", temp);
+                            }
+                        }
+                    }
+                    catch(ObjectDisposedException e)
+                    {
+                        Console.WriteLine("\nERROR: {0}", e.Message);
+                        break;
+                    }
+                }
+            }
+
+        }
+    }
+}
